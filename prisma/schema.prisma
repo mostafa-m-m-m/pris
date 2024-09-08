@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Package {
+  id            Int            @id @default(autoincrement())
+  name          String
+  basePrice     Float
+  annualPrice   Float
+  monthlyPrice  Float
+  currency      Currency
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+
+  CurrencyPrice CurrencyPrice[]
+}
+model CurrencyPrice {
+  id          Int      @id @default(autoincrement())
+  currency    String
+  price        Float
+  packageId   Int
+  package     Package  @relation(fields: [packageId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model Subscription {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  packageId Int
+  startDate DateTime         @default(now())
+  endDate   DateTime
+  type      SubscriptionType
+  package   Package          @relation(fields: [packageId], references: [id])
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  subscriptions Subscription[]
+}
+
+enum Currency {
+  USD
+  EUR
+  EGP
+}
+
+enum SubscriptionType {
+  MONTHLY
+  ANNUAL
+}
